@@ -1,4 +1,4 @@
-reGeorg for PHP Shell
+reGeorg for PHP One-line Shell
 =========
 
 ```                    _____
@@ -58,7 +58,6 @@ optional arguments:
 
 Example
 ---------
-```
 $ python reGeorgSocksProxy.py -p 8080 -u http://127.0.0.1/shell.php -k a
 ```
 
