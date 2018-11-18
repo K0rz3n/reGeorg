@@ -15,6 +15,8 @@ sam@sensepost.com / [@trowalts]
 
 etienne@sensepost.com / [@kamp_staaldraad]
 
+github@zsxsoft.com / [@zsxsoft]
+
 
 What's this?
 ----
